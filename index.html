@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SQL Detetive — O mistério dos pedidos</title>
+<style>
+:root{--p:#5B36B1;--l:#A78BFA;--lav:#F5F3FF;--w:#fff;--g:#25213B;--mu:#5d5878;--ln:#e2dcf5;--ok:#17724a;--okb:#e5f6ee;--er:#a8231b;--erb:#fdecea}
+*{box-sizing:border-box}body{margin:0;background:var(--lav);color:var(--g);font:19px/1.55 system-ui,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}:focus-visible{outline:3px solid var(--l);outline-offset:2px}
+svg.i{width:1.1em;height:1.1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.18em}
+.top{background:var(--w);border-bottom:1px solid var(--ln);position:sticky;top:0;z-index:5}
+.bar,.steps,main{max-width:1160px;margin:auto;padding-left:18px;padding-right:18px}
+.bar{padding-top:10px;padding-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:23px;color:var(--p);margin-right:auto}.logo small{display:block;font-size:14px;font-weight:500;color:var(--mu)}
+.chip{display:inline-flex;gap:6px;align-items:center;background:var(--lav);border:1px solid var(--ln);border-radius:99px;padding:4px 13px;font-size:16px;color:var(--p);font-weight:600}
+.ib{background:var(--w);border:1px solid var(--ln);border-radius:10px;padding:7px 11px;color:var(--p)}
+.steps{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px}
+.st{flex:1 0 auto;border:1px solid var(--ln);background:var(--w);border-radius:10px;padding:6px 12px;font-size:16px;color:var(--mu)}
+.st.on{background:var(--p);color:#fff;border-color:var(--p);font-weight:700}.st.dn:not(.on){background:#ede9fe;color:var(--p)}
+main{padding-top:18px;padding-bottom:40px}
+.card{background:var(--w);border:1px solid var(--ln);border-radius:16px;padding:clamp(18px,3vw,34px);box-shadow:0 2px 10px #5b36b114;margin-bottom:16px}
+h1{font-size:clamp(32px,4.5vw,50px);line-height:1.1;margin:0 0 14px;letter-spacing:-.02em}h2{font-size:clamp(26px,3vw,34px);margin:0 0 6px}h3{font-size:22px;margin:0 0 8px}
+.lead{font-size:21px;color:var(--mu);margin:4px 0 16px}.mu{color:var(--mu)}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.sp{justify-content:space-between}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.box{background:var(--lav);border:1px solid var(--ln);border-radius:12px;padding:14px 16px}.box h3{font-size:20px;margin-bottom:4px}
+.task{border-left:6px solid var(--p);background:var(--lav);border-radius:10px;padding:14px 18px;margin:16px 0}
+code,.cd{font-family:ui-monospace,Consolas,monospace}code{background:var(--lav);color:var(--p);padding:1px 6px;border-radius:6px;font-size:.92em}
+.cd{background:var(--g);color:#e9e3ff;border-radius:12px;padding:14px 18px;font-size:19px;line-height:1.7;white-space:pre-wrap;margin:10px 0}.cd b{color:var(--l)}.cd i{color:#f9c97a;font-style:normal}
+.btn{background:var(--p);color:#fff;border:0;border-radius:10px;padding:10px 20px;font-weight:700;min-height:46px}.btn.alt{background:var(--w);color:var(--p);border:1.5px solid var(--p)}
+.btn:hover:not(:disabled){background:#46288f}.btn.alt:hover:not(:disabled){background:var(--lav)}
+.opt{display:block;width:100%;text-align:left;background:var(--w);border:1.5px solid var(--ln);border-radius:12px;padding:12px 16px;margin:8px 0;color:var(--g)}.opt:hover:not(:disabled){border-color:var(--l);background:var(--lav)}
+.opt.sel{border-color:var(--p);background:var(--lav)}.opt.good{border-color:var(--ok);background:var(--okb)}.opt.no{border-color:var(--er);background:var(--erb)}
+.pill{border:1.5px solid var(--ln);background:var(--w);border-radius:10px;padding:8px 14px;font-family:ui-monospace,monospace;font-size:18px;color:var(--g)}.pill.sel{background:var(--p);color:#fff;border-color:var(--p)}
+.tw{overflow:auto;border:1px solid var(--ln);border-radius:12px;max-height:340px;background:var(--w)}table{border-collapse:collapse;width:100%;font-size:18px}
+th,td{text-align:left;padding:8px 14px;border-bottom:1px solid var(--ln);white-space:nowrap}th{background:#ede9fe;color:var(--p);position:sticky;top:0}tr.ck{cursor:pointer}tr.ck:hover td{background:var(--lav)}tr.sel td{background:#ddd2fb}tbody tr:last-child td{border:0}
+.fb{border-radius:10px;padding:12px 16px;margin:12px 0;border-left:6px solid var(--p);background:var(--lav)}.fb.ok{background:var(--okb);border-color:var(--ok);color:#0f4d32}.fb.bad{background:var(--erb);border-color:var(--er);color:#7a1812}
+.ed{display:block;width:100%;min-height:140px;background:var(--g);color:#f1edff;caret-color:var(--l);border:2px solid var(--g);border-radius:12px;padding:16px;font:20px/1.6 ui-monospace,Consolas,monospace;resize:vertical;tab-size:2}.ed:focus{border-color:var(--l);outline:0}
+textarea.pl{width:100%;min-height:80px;border:1.5px solid var(--ln);border-radius:10px;padding:10px;font:inherit}
+.tabs{display:flex;gap:8px;margin:10px 0}.tab{border:1.5px solid var(--ln);background:var(--w);border-radius:10px;padding:7px 16px;color:var(--p);font-weight:700}.tab.on{background:var(--p);color:#fff}
+.quote{border-left:5px solid var(--l);background:var(--lav);padding:12px 18px;border-radius:0 10px 10px 0;font:21px/1.6 Georgia,serif;margin:10px 0}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.tch{border:1.5px dashed var(--l);background:#faf8ff;border-radius:12px;padding:12px 16px;margin-bottom:16px}.tch summary{cursor:pointer;font-weight:700;color:var(--p)}
+.big{text-align:center;padding:28px 8px}.big h2{color:var(--p);font-size:40px}
+.modal{position:fixed;inset:0;background:#25213bcc;display:grid;place-items:center;z-index:20}.modal .card{width:min(420px,92vw);margin:0}
+label{display:block;font-weight:600;margin:10px 0 4px}label.mu{font-weight:400}.pill.good{background:var(--okb);border-color:var(--ok);color:#0f4d32}.pill.no{background:var(--erb);border-color:var(--er);color:#7a1812}details summary{cursor:pointer;margin:8px 0}
+input.pw{width:100%;padding:10px;font:inherit;border:1.5px solid var(--ln);border-radius:10px;margin:8px 0}
+@media(max-width:760px){body{font-size:17px}.g3,.g2{grid-template-columns:1fr}.lead{font-size:18px}table{font-size:16px}.cd,.ed{font-size:17px}}
+.article-frame{border:1px solid var(--ln);border-radius:14px;padding:14px;background:#fff;margin:15px 0}.article-frame iframe{display:block;width:100%;height:455px;border:1px solid var(--ln);border-radius:8px;background:#f4f4f4;margin-top:10px}.reading-check{display:flex;align-items:center;gap:12px;padding:15px 18px;background:var(--okb);border:2px solid #96d7b6;border-radius:12px;font-size:19px;cursor:pointer}.reading-check input{width:24px;height:24px;accent-color:var(--ok);flex-shrink:0}.next-round{margin-top:16px;width:100%;font-size:21px}.quote{margin:10px 0}@media(max-width:760px){.article-frame iframe{height:360px}}
+</style></head><body>
+<div class="top"><div class="bar"><div class="logo"><span id="lg"></span> SQL Detetive<small>O mistério dos pedidos · Educação em Computação</small></div>
+<span class="chip" id="clock"></span><button class="ib" id="pp" onclick="toggleClock()"></button><button class="ib" id="rc" title="Reiniciar cronômetro" aria-label="Reiniciar cronômetro" onclick="restartClock()"></button>
+<button class="ib" id="tb" onclick="openTeacher()"></button></div><nav class="steps" id="steps" aria-label="Missões"></nav></div>
+<main id="main"></main><div id="modal"></div>
+
+<script id="core">
+'use strict';
+const DATA=[[101,'Ana','Santos',250,'Pendente'],[102,'Bruno','Registro',800,'Entregue'],[103,'Carla','Santos',750,'Pendente'],[104,'Diego','Campinas',920,'Pendente'],[105,'Elisa','Santos',610,'Entregue'],[106,'Fábio','Registro',420,'Pendente'],[107,'Aline','Campinas',380,'Entregue'],[108,'Heitor','Registro',1150,'Pendente'],[109,'Iara','Campinas',560,'Pendente'],[110,'João','Santos',990,'Cancelado']];
+const COLS=['id','cliente','cidade','valor','status'];
+const SCHEMA='CREATE TABLE pedidos(id INTEGER PRIMARY KEY, cliente TEXT, cidade TEXT, valor REAL, status TEXT)';
+const strip=q=>q.replace(/--[^\n]*/g,' ').replace(/\/\*[\s\S]*?\*\//g,' ');
+const noStr=q=>q.replace(/'([^']|'')*'/g,"''");
+function guard(q){const c=strip(String(q||'')).trim();if(!c)return 'Digite uma consulta antes de executar.';
+ if(noStr(c).replace(/;\s*$/,'').includes(';'))return 'Execute uma instrução por vez: remova o ; do meio da consulta.';
+ if(!/^select\b/i.test(c))return /^(insert|update|delete|drop|alter|create|replace|pragma|attach|vacuum|begin|commit)\b/i.test(c)?'Aqui só é permitido consultar com SELECT. A base de dados não pode ser alterada.':'A consulta precisa começar com SELECT.';return ''}
+function friendly(m){m=String(m);let r;
+ if(r=m.match(/no such column: (.+)/i))return `A coluna «${r[1]}» não existe. Colunas da tabela: ${COLS.join(', ')}. Textos precisam de aspas simples, como 'Santos'.${/^(des|dsc|dec|asc|acs)\w*$/i.test(r[1])?' Você quis escrever DESC (decrescente) ou ASC (crescente)?':''}`;
+ if(/no such table/i.test(m))return 'Tabela não encontrada. Nesta aula, use FROM pedidos.';
+ if(r=m.match(/near "([^"]*)": syntax error/i))return `Erro de sintaxe perto de «${r[1]}». Confira as vírgulas entre colunas, a ordem SELECT → FROM → WHERE → ORDER BY e as aspas. Para comparar, use um operador (=, <, >) e coloque textos entre aspas simples: status = 'Pendente'.`;
+ if(/incomplete input/i.test(m))return 'A consulta está incompleta: falta algo no final (coluna, tabela, valor ou aspas).';
+ if(/unrecognized token/i.test(m))return 'Há um caractere inválido ou aspas não fechadas. Textos usam aspas simples.';
+ if(/syntax error/i.test(m))return 'Erro de sintaxe. Estrutura esperada: SELECT colunas FROM pedidos WHERE condição ORDER BY coluna.';
+ return 'O SQLite não conseguiu executar a consulta: '+m}
+function run(ad,q){const g=guard(q);if(g)throw new Error(g);try{return ad(q)}catch(e){throw new Error(friendly(e.message||e))}}
+const bad=m=>({ok:false,msg:m});
+function judge(o,s,x){const n=x.cols.length,m=o.cols.length,L=o.rows.length,F=x.rows.length;
+ if(!L)return bad('A consulta executou, mas não retornou nenhuma linha. Revise a condição do WHERE.');
+ if(m<n||(!s.extra&&m>n))return bad(`O resultado tem ${m} coluna(s), mas o enunciado pede ${s.extra?'pelo menos ':''}${n}${s.want?' ('+s.want+')':''}. Releia o que deve aparecer no resultado${m>n?' (SELECT * mostra colunas demais)':''}.`);
+ const part=!!(s.minRows&&s.ordered&&L<F);
+ if(part&&L<s.minRows)return bad(`O resultado tem ${L} linha(s); para decidir é preciso ver pelo menos ${s.minRows}.`);
+ if(L!==F&&!part)return bad(L>F?`Foram retornadas ${L} linhas, mas só ${F} atendem ao pedido. Falta filtrar com WHERE ou a condição está ampla demais.`:`Foram retornadas ${L} linhas, mas o pedido tem ${F}. A condição do WHERE está restritiva demais.`);
+ const XR=part?x.rows.slice(0,L):x.rows,K=a=>a.join('\u0001'),S=a=>K(a.slice().sort()),map=[],used=new Set();
+ for(let i=0;i<n;i++){const b=XR.map(r=>String(r[i]));let f=-1,same=false;
+  for(let j=0;j<m;j++){if(used.has(j))continue;const a=o.rows.map(r=>String(r[j]));
+   if(s.ordered?K(a)===K(b):S(a)===S(b)){f=j;break}if(S(a)===S(b))same=true}
+  if(f<0)return bad(same?'As linhas certas apareceram, mas fora da ordem pedida. Revise o ORDER BY: coluna de ordenação e ASC/DESC.':`Os valores da coluna «${x.cols[i]}» não correspondem ao pedido. Confira colunas, WHERE e ordenação.`);
+  used.add(f);map.push(f)}
+ if(!s.ordered){const e=XR.map(r=>r.map(String).join('\u0001')).sort(),a=o.rows.map(r=>map.map(j=>String(r[j])).join('\u0001')).sort();if(K(a)!==K(e))return bad('As colunas certas aparecem, mas combinadas em linhas erradas.')}
+ return{ok:true}}
+function check(ad,q,s){const o=run(ad,q),x=run(ad,s.sql);
+ if(/\bselect\s+(?!distinct\b)\w+\s+(?!as\b|from\b)\w+\s+from\b/i.test(noStr(strip(q))))return{ok:false,msg:'Parece faltar uma vírgula entre as colunas. Sem vírgula, o SQL entende o segundo nome como apelido (alias) da primeira coluna.',out:o};
+ const j=judge(o,s,x);
+ if(j.ok){const c=noStr(strip(q));for(const k of s.need||[])if(!new RegExp('\\b'+k.replace(' ','\\s+')+'\\b','i').test(c))return{ok:false,msg:`O resultado confere, mas o enunciado pede que você use ${k}.`,out:o}}
+ return{...j,out:o}}
+const LABS=[
+ {t:'Mostre <b>cliente</b> e <b>valor</b> dos pedidos com status <b>Entregue</b>, do <b>maior para o menor</b> valor.',sql:"SELECT cliente, valor FROM pedidos WHERE status = 'Entregue' ORDER BY valor DESC",ordered:true,want:'cliente e valor',need:['WHERE','ORDER BY'],
+  hints:['Três decisões: quais colunas mostrar, qual linha filtrar e em que ordem apresentar.','Estrutura: SELECT ... FROM pedidos WHERE ... ORDER BY ...','Falta só preencher: WHERE status = '+"'Entregue'"+' e ORDER BY valor com a direção que coloca o maior primeiro.'],sol:"SELECT cliente, valor FROM pedidos WHERE status = 'Entregue' ORDER BY valor DESC;"}];
+const CASE={sql:"SELECT cidade, cliente, valor FROM pedidos WHERE status = 'Pendente' ORDER BY valor DESC",ordered:true,extra:true,want:'cidade, cliente e valor',minRows:4,need:['WHERE','ORDER BY'],sol:"SELECT cidade, cliente, valor FROM pedidos WHERE status = 'Pendente' ORDER BY valor DESC;"};
+const GAME=[
+ {goal:'A gerente pergunta: <b>“Quais clientes de Santos têm pedidos Pendentes e qual o valor de cada pedido?”</b> Qual consulta responde exatamente à solicitação?',opts:[
+  {label:"SELECT cliente, valor FROM pedidos WHERE cidade = 'Santos' AND status = 'Pendente';",ok:1,why:'Correto. SELECT mostra cliente e valor; WHERE com AND mantém somente os pedidos pendentes de Santos.'},
+  {label:"SELECT cliente, valor FROM pedidos WHERE cidade = 'Santos';",ok:0,why:'Essa consulta inclui todos os pedidos de Santos, inclusive os Entregues e Cancelados. Falta filtrar por status.'},
+  {label:"SELECT cliente, cidade FROM pedidos WHERE cidade = 'Santos' AND status = 'Pendente';",ok:0,why:'O filtro está certo, mas o resultado mostra cidade em vez de valor, solicitado pela gerente.'},
+  {label:"SELECT cliente, valor FROM pedidos WHERE cidade = 'Santos' AND status = 'Entregue';",ok:0,why:'O filtro seleciona pedidos Entregues, mas a solicitação pede Pendentes.'}]},
+ {goal:'A gerente pediu <b>somente pedidos pendentes</b>, ordenados pelo valor decrescente. A consulta abaixo executa normalmente, mas o resultado não atende ao pedido. <b>Qual é o problema?</b>',show:"SELECT cliente, valor FROM pedidos ORDER BY valor DESC;",opts:[
+  {label:'Faltou selecionar a coluna cidade.',ok:0,why:'O enunciado não pede a cidade no resultado.'},
+  {label:'A consulta deveria ordenar por nome.',ok:0,why:'A gerente pediu ordenação por valor.'},
+  {label:'Faltou filtrar os pedidos pendentes com WHERE.',ok:1,why:'Sem WHERE, entram também pedidos Entregues e Cancelados. SQL válido não garante resposta correta.'},
+  {label:'DESC deveria ser substituído por ASC.',ok:0,why:'DESC é a direção correta para maior valor primeiro.'}]}];
+if(typeof module!=='undefined')module.exports={DATA,COLS,SCHEMA,guard,friendly,run,judge,check,LABS,CASE,GAME};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sql.js@1.14.1/dist/sql-wasm.js"></script>
+<script id="ui">
+const CDN='https://cdn.jsdelivr.net/npm/sql.js@1.14.1/dist/',PW='SQL26';
+const IC={search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',check:'<path d="M20 6 9 17l-5-5"/>',bulb:'<path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/>',reset:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/>',play:'<path d="M6 4l14 8-14 8z"/>',pause:'<path d="M8 5v14M16 5v14"/>',lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',chat:'<path d="M21 12a8 8 0 0 1-11.5 7.2L3 21l1.8-6A8 8 0 1 1 21 12z"/>',ext:'<path d="M14 3h7v7M10 14 21 3M19 14v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/>'};
+const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+const h=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hl=s=>h(s).replace(/\b(SELECT|FROM|WHERE|ORDER BY|ASC|DESC|AND|LIMIT)\b/g,'<b>$1</b>').replace(/('[^']*')/g,'<i>$1</i>');
+const E=id=>document.getElementById(id);
+const STEPS=['Abertura','1 · Explorar','2 · Vídeo','3 · Consultar','4 · Pesquisa','5 · Jogo','6 · Laboratório','7 · Decisão','Encerramento'];
+const S={cur:0,done:new Set(),teacher:false,el:0,run:false,t1:0,ready:false,err:'',ad:null,tv:true,a1:{pk:null,map:{}},dir:'DESC',q:{},v:{link:'',from:'',to:'',note:'',msg:''},sent:false,tr:false,g:{r:0,sel:null,done:[0,0],tried:[[],[]]},lab:{i:0,txt:[''],res:[null],hint:[0],ok:[false]},c:{txt:'',res:null,hint:0,city:null,ev:null,msg:'',q:false}};
+const fb=(m,t='')=>`<div class="fb ${t}">${m}</div>`;
+function tbl(cols,rows){return `<div class="tw"><table><thead><tr>${cols.map(c=>`<th>${h(c)}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(r=>`<tr>${r.map(v=>`<td>${h(v)}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${cols.length||1}">Nenhuma linha</td></tr>`}</tbody></table></div>`}
+const base=()=>tbl(COLS,DATA);
+const tview=()=>`<details ${S.tv?'open':''} ontoggle="S.tv=this.open"><summary class="mu">Ver a tabela <code>pedidos</code> (consulte enquanto escreve)</summary>${base()}</details>`;
+const exq=q=>run(S.ad,q);
+function live(q){if(!S.ready)return fb(h(S.err||'Carregando SQLite…'));try{const o=exq(q);return tbl(o.cols,o.rows)}catch(e){return fb(h(e.message),'bad')}}
+function res(r){if(!r)return '';if(r.err)return fb(h(r.err),'bad');return `<h3>Resultado · ${r.out.rows.length} linha(s)</h3>${tbl(r.out.cols,r.out.rows)}${fb(h(r.msg||'Consulta correta! O resultado atende ao enunciado.'),r.ok?'ok':'bad')}`}
+function eng(){return S.ready?`<span class="chip">${ic('check')} SQLite real pronto</span>`:`<span class="chip">${h(S.err||'Carregando SQLite…')}</span>`}
+function quiz(id,q,opts,c,why){const a=S.q[id];return `<div class="task"><b>${q}</b></div>${opts.map((o,i)=>`<button class="opt ${a===i?(i===c?'good':'no'):''}" onclick="S.q['${id}']=${i};chk();render()">${o}</button>`).join('')}${a!=null?fb(a===c?'Correto! '+why:'Ainda não. Releia a explicação acima e tente outra alternativa.',a===c?'ok':'bad'):''}`}
+function chk(){const q=S.q;if(q.m2b===0&&q.m2c===0)S.done.add(3)}
+const M1C={id:['Não usar','Identifica o pedido, mas a pergunta não pede o número do pedido.'],cliente:['Mostrar','A gerente quer saber quais clientes: a coluna aparece no resultado.'],cidade:['Filtrar','A cidade restringe quais linhas entram: só Santos.'],valor:['Mostrar','A gerente quer o valor de cada pedido: a coluna aparece no resultado.'],status:['Filtrar','O status restringe quais linhas entram: só Pendente.']};
+function setCol(c,v){S.a1.map[c]=v;chk1();render()}
+function chk1(){const a=S.a1;if(a.pk==='id'&&COLS.every(c=>a.map[c]===M1C[c][0]))S.done.add(1)}
+function m1(){const a=S.a1;
+ return `<p class="lead">Antes de escrever SQL, aprenda a ler uma tabela e a planejar uma consulta.</p>
+ <div class="g3"><div class="box"><h3>Tabela</h3>Conjunto de registros sobre um mesmo assunto: <code>pedidos</code>.</div><div class="box"><h3>Linha (registro)</h3>Um pedido completo.</div><div class="box"><h3>Coluna</h3>Uma característica de todos os pedidos, como <code>valor</code>.</div></div>
+ <p>A <b>chave primária</b> é a coluna que identifica cada registro de forma única, sem repetição.</p>${base()}
+ <div class="task"><b>Exploração 1.</b> Qual coluna é a chave primária?</div><div class="row">${COLS.map(c=>`<button class="pill ${a.pk===c?'sel':''}" onclick="S.a1.pk='${c}';chk1();render()">${c}</button>`).join('')}</div>
+ ${a.pk?fb(a.pk==='id'?'Certo: <code>id</code> é único para cada pedido.':'Esta coluna tem valores que podem se repetir. Procure a que nunca repete.',a.pk==='id'?'ok':'bad'):''}
+ <div class="task"><b>Exploração 2 — Planeje a consulta:</b><p style="margin:10px 0">A gerente pergunta: <i>“Quais clientes de <b>Santos</b> ainda têm pedido <b>Pendente</b>, e de quanto é cada pedido?”</i></p><p style="margin:0">Para cada coluna, decida: <b>Mostrar</b> no resultado, <b>Filtrar</b> as linhas (critério) ou <b>Não usar</b>.</p></div>
+ ${COLS.map(c=>{const v=a.map[c];return `<div class="row" style="margin:6px 0"><code style="min-width:84px">${c}</code>${['Mostrar','Filtrar','Não usar'].map(o=>`<button class="pill ${v===o?(M1C[c][0]===o?'good':'no'):''}" style="font-family:inherit" onclick="setCol('${c}','${o}')">${o}</button>`).join('')}${v?`<span class="${M1C[c][0]===v?'':'mu'}">${v===M1C[c][0]?h(M1C[c][1]):'Reveja: essa coluna cumpre outro papel nesta pergunta.'}</span>`:''}</div>`}).join('')}
+ ${S.done.has(1)?fb('Você planejou uma consulta: o que <b>mostrar</b> vira <code>SELECT</code> e o que <b>filtrar</b> vira <code>WHERE</code>. Vamos aprender a escrever essa consulta depois do vídeo introdutório.','ok'):''}`}
+function m3(){return `<p class="lead">Cinco elementos essenciais para construir consultas SQL: <code>SELECT</code>, <code>FROM</code>, <code>WHERE</code>, <code>AND</code> e <code>ORDER BY</code>.</p>
+ <div class="g3"><div class="box"><h3>SELECT</h3>Quais colunas <b>mostrar</b>, separadas por vírgula. <code>SELECT *</code> mostra todas.</div><div class="box"><h3>FROM</h3>De qual <b>tabela</b> vêm os dados.</div><div class="box"><h3>WHERE</h3>Quais linhas <b>passam no filtro</b>. É opcional.</div></div>
+ <div class="cd"><b>SELECT</b> cliente, valor\n<b>FROM</b> pedidos\n<b>WHERE</b> cidade = <i>'Campinas'</i>;</div>
+ <p>Operadores de comparação: <code>=</code> <code>&lt;&gt;</code> <code>&gt;</code> <code>&lt;</code> <code>&gt;=</code> <code>&lt;=</code>. Texto vai entre aspas simples; número, sem aspas. O <code>;</code> encerra a instrução.</p>
+ <div class="box"><h3>AND: duas condições ao mesmo tempo</h3>A linha só aparece se <b>as duas</b> condições forem verdadeiras.<div class="cd" style="margin:8px 0">${hl("SELECT cliente, valor FROM pedidos WHERE cidade = 'Santos' AND status = 'Entregue';")}</div>${live("SELECT cliente, valor FROM pedidos WHERE cidade = 'Santos' AND status = 'Entregue'")}</div>
+ <div class="card" style="box-shadow:none;margin-top:16px"><div class="row sp"><h3>ORDER BY: ordenar a apresentação</h3><div class="tabs"><button class="tab ${S.dir==='ASC'?'on':''}" onclick="S.dir='ASC';render()">ASC</button><button class="tab ${S.dir==='DESC'?'on':''}" onclick="S.dir='DESC';render()">DESC</button></div></div>
+ <p><code>ASC</code> é crescente (padrão); <code>DESC</code> é decrescente. <code>ORDER BY</code> vem por último.</p>
+ <div class="cd" style="margin:0 0 10px">${hl(`SELECT cliente, valor FROM pedidos ORDER BY valor ${S.dir};`)}</div>
+ <div class="g2"><div><b>Resultado da consulta</b>${live(`SELECT cliente, valor FROM pedidos ORDER BY valor ${S.dir}`)}</div><div><b>Tabela guardada (não muda)</b>${tbl(['id','cliente','valor'],DATA.map(r=>[r[0],r[1],r[3]]))}</div></div></div>
+ ${quiz('m2b','Depois de executar <code>ORDER BY valor DESC</code>, o que acontece com os dados gravados?',['Nada: só muda a apresentação do resultado.','A ordem exibida fica salva permanentemente no banco de dados.','Os valores são apagados.'],0,'ORDER BY não altera a tabela.')}
+ ${quiz('m2c','Qual condição traz os pedidos de <b>Santos</b> que estão <b>Pendentes</b>?',["WHERE cidade = 'Santos' AND status = 'Pendente'","WHERE cidade = 'Santos', status = 'Pendente'","WHERE 'Santos' AND 'Pendente'"],0,'AND liga duas comparações completas.')}`}
+// CONFIGURAÇÃO DA AULA: preencha os três campos ao receber o link do vídeo.
+// Exemplo: {url:'https://youtu.be/XXXXX', inicio:'01:20', fim:'04:10'}
+const VIDEO_AULA={url:'https://www.youtube.com/watch?v=cDDK4t-VOOY',inicio:'0:31',fim:'2:11'};
+function m2(){const v=VIDEO_AULA;const ok=Boolean(v.url&&v.inicio&&v.fim);
+ return `<p class="lead">Antes de aprender a construir consultas, vamos conhecer o SQL e sua finalidade.</p>
+ <div class="task"><b>Assista ao vídeo introdutório abaixo.</b></div>
+ <div class="box" style="margin:16px 0"><h3>Vídeo · O que é SQL?</h3>
+ ${v.url?`<p><a class="btn alt" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px" href="${h(v.url+'&t=31s')}" target="_blank" rel="noopener noreferrer">${ic('ext')} Abrir vídeo</a></p><p class="mu" style="overflow-wrap:anywhere;font-size:16px">${h(v.url)}</p>`:`<p class="mu">Link do vídeo: <b>a definir</b></p>`}
+ <div class="row" style="gap:18px"><span class="chip">${ic('play')} Início: ${h(v.inicio||'a definir')}</span><span class="chip">${ic('clock')} Fim: ${h(v.fim||'a definir')}</span></div></div>
+ <label class="reading-check"><input type="checkbox" ${S.done.has(2)?'checked':''} onchange="if(this.checked)S.done.add(2);else S.done.delete(2);render()"> <span>Confirmo que assisti ao trecho indicado do vídeo.</span></label>
+ ${S.done.has(2)?fb('Vídeo concluído! Agora vamos aprender a consultar, filtrar e ordenar dados.','ok'):''}`}
+function m4(){const pdf='https://jyx.jyu.fi/bitstreams/8fce5c27-bfd9-4b5b-ab94-22233067504c/download';
+ const record='https://jyx.jyu.fi/handle/123456789/59322';
+ const original=[
+ `In regard to semantic errors, previous research presents definitions for different levels of precision. Buitendijk [6, p. 79] states that a query that contains a semantic error is produced with “an erroneous train of thought”. Buitendijk’s [6] study contains the word pair logical errors, but the SQL errors that are not syntax errors are called semantic errors. However, Buitendijk [6] points out that it is possible for a user to commit a logical error, which results in the query being incorrect for the particular data demand. Smelcer [34] and Ahadi et al. [1] propose that the semantically incorrect query is syntactically correct but returns information not intended by the user. Ahadi et al. [3] state that a query with a semantic error produces either an empty result table or a result table that is not the same as desired.`,
+ `Brass and Goldberg [4] detail the semantic error definition by stating that the SQL query is legal (i.e., syntactically correct) but does not always produce the intended results for a given data demand (they use the word task). Brass and Goldberg [4] make a further distinction between queries that are incorrect regardless of the data demand and queries that are incorrect for a particular data demand. These authors leave the latter class of semantic errors outside of their study and state that it is possible to implement functionality to DBMSs to detect the former class of semantic errors. We consider these former and latter classes of semantic errors fundamentally different by definition and from now on call the latter class logical errors and the former class semantic errors.`];
+ const translation=[
+ `Em relação aos erros semânticos, pesquisas anteriores apresentam definições com diferentes níveis de precisão. Buitendijk [6, p. 79] afirma que uma consulta que contém um erro semântico é produzida por “uma linha de raciocínio equivocada”. O estudo de Buitendijk [6] utiliza a expressão erros lógicos, mas denomina erros semânticos os erros de SQL que não são erros de sintaxe. Entretanto, Buitendijk [6] observa que um usuário pode cometer um erro lógico que torna a consulta incorreta para uma necessidade específica de informação. Smelcer [34] e Ahadi et al. [1] propõem que uma consulta semanticamente incorreta está sintaticamente correta, mas retorna informações que não eram pretendidas pelo usuário. Ahadi et al. [3] afirmam que uma consulta com erro semântico produz uma tabela de resultados vazia ou diferente da desejada.`,
+ `Brass e Goldberg [4] detalham a definição de erro semântico afirmando que a consulta SQL é válida (isto é, sintaticamente correta), mas nem sempre produz os resultados pretendidos para determinada necessidade de informação (eles usam o termo tarefa). Brass e Goldberg [4] distinguem ainda consultas incorretas independentemente da necessidade de informação e consultas incorretas para uma necessidade específica. Esses autores não abordaram em seu estudo essa segunda classe de erros semânticos e afirmam ser possível implementar funcionalidades nos sistemas gerenciadores de bancos de dados para detectar a primeira classe. Consideramos essas duas classes fundamentalmente diferentes em sua definição e, a partir deste ponto, denominamos a segunda classe erros lógicos e a primeira classe erros semânticos.`];
+ return `<p class="lead">O que a pesquisa científica revela sobre consultas SQL que executam, mas não respondem corretamente ao problema?</p>
+ <div class="box"><h3>Artigo científico · Taipalus, Siponen e Vartiainen (2018)</h3>
+ <p><em>Errors and Complications in SQL Query Formulation</em><br><span class="mu"><b>Tradução do título:</b> Erros e complicações na formulação de consultas SQL</span><br><em>ACM Transactions on Computing Education</em>, 18(3), artigo 15.</p>
+ 
+ <div class="row"><a class="btn alt" href="${pdf}" target="_blank" rel="noopener noreferrer" style="text-decoration:none">${ic('ext')} Artigo original (PDF)</a><a class="btn alt" href="${record}" target="_blank" rel="noopener noreferrer" style="text-decoration:none">${ic('ext')} Página oficial</a></div></div>
+ <div class="task"><b>Leitura científica.</b> Leia os trechos dos pesquisadores e, quando concluir, marque a confirmação de leitura. </div>
+ <section class="article-frame" aria-label="Leitura científica integrada" style="padding:clamp(20px,3vw,32px);background:#fff;border:2px solid var(--ln);border-radius:14px">
+ <div class="row sp"><h3 style="font-size:25px;margin:0">Quando SQL válido não significa resposta correta</h3><div class="tabs" role="group" aria-label="Idioma do artigo"><button class="tab ${S.tr?'':'on'}" aria-pressed="${!S.tr}" onclick="S.tr=false;render()">Original (inglês)</button><button class="tab ${S.tr?'on':''}" aria-pressed="${S.tr}" onclick="S.tr=true;render()">Tradução (português)</button></div></div>
+ <p class="mu" style="font-size:16px"><b>${S.tr?'Tradução nossa para a aula':'Texto original dos autores, em inglês'}</b> · Seção 2.2, páginas 3–4. Os dois excertos não são consecutivos no documento e aparecem identificados separadamente.</p>
+ ${(S.tr?translation:original).map((t,i)=>`<div class="box" lang="${S.tr?'pt-BR':'en'}" style="background:#fff;border-left:5px solid var(--p);padding:20px 22px;margin:12px 0"><div class="mu" style="font-size:15px;font-weight:700;margin-bottom:8px">Excerto ${i+1} ${S.tr?'· tradução':'· citação literal'}</div><p style="font-size:19px;line-height:1.8;margin:0">${h(t)}</p></div>`).join('')}
+ <div class="box" style="background:var(--lav);margin-top:16px"><b>Conexão com o SQL Detetive · contextualização didática nossa</b><p style="margin:8px 0 0">O banco pode executar uma consulta e apresentar resultados, mas isso não garante que ela responda à pergunta original. Por isso, nas próximas missões, vamos conferir filtros, colunas e ordenação, comparando o resultado com o objetivo solicitado. <b>Este parágrafo não faz parte do artigo original.</b></p></div>
+ </section>
+ <div class="task"><b>${ic('check')} Confirmação de leitura</b><p>Depois da leitura, marque a caixa para registrar sua participação.</p></div>
+ <label class="reading-check"><input type="checkbox" ${S.sent?'checked':''} onchange="S.sent=this.checked;if(S.sent)S.done.add(4);else S.done.delete(4);render()"> <span>Confirmo que li o trecho do artigo científico.</span></label>
+ ${S.sent?fb('Leitura registrada!','ok'):''}`}
+function pick(i){const g=S.g;if(g.done[g.r])return;g.sel=i;const o=GAME[g.r].opts[i];if(o.ok)g.done[g.r]=1;else if(!g.tried[g.r].includes(i))g.tried[g.r].push(i);if(g.done.every(Boolean))S.done.add(5);render()}
+function nextR(){if(S.g.r<GAME.length-1&&S.g.done[S.g.r]){S.g.r++;S.g.sel=null;render()}}
+function m5(){const g=S.g;if(g.done.every(Boolean))return `<div class="big"><h2>Parabéns, detetive!</h2><p class="lead">Você completou as duas rodadas. Agora sabe diferenciar filtros, ordenação e erros lógicos.</p></div>`;
+ const R=GAME[g.r];let f='';if(g.sel!=null){const o=R.opts[g.sel];f=fb((o.ok?'<b>Correto!</b> ':'<b>Reveja sua escolha.</b> ')+h(o.why),o.ok?'ok':'bad')}
+ return `<div class="row sp"><h3>Rodada ${g.r+1} de ${GAME.length}</h3><span class="chip">${g.done.filter(Boolean).length}/${GAME.length} concluídas</span></div>
+ <div class="task">${R.goal}</div>${g.r===0?tview():''}${R.show?`<div class="cd">${hl(R.show)}</div>`:''}
+ <p class="mu">Escolha uma alternativa. Você receberá uma explicação após responder.</p>
+ ${R.opts.map((o,i)=>`<button class="opt ${g.sel===i?(o.ok?'good':'no'):''}" ${g.done[g.r]?'disabled':''} onclick="pick(${i})"><b>${'ABCD'[i]}.</b> ${h(o.label)}</button>`).join('')}${f}
+ ${g.done[g.r]&&g.r<GAME.length-1?`<button class="btn next-round" onclick="nextR()">Próxima rodada →</button>`:''}`}
+function runLab(){const L=S.lab,i=L.i;L.txt[i]=E('ed').value;try{const r=check(S.ad,L.txt[i],LABS[i]);L.res[i]=r;if(r.ok)L.ok[i]=true}catch(e){L.res[i]={err:e.message}}if(L.ok[0])S.done.add(6);render()}
+function editor(id,val,ph,fn){return `<label for="${id}" class="mu">Escreva sua consulta SQL (Ctrl+Enter executa):</label><textarea id="${id}" class="ed" spellcheck="false" placeholder="${ph}" oninput="${fn}(this.value)" onkeydown="if(event.ctrlKey&&event.key=='Enter')${id==='ed'?'runLab()':'runCase()'}">${h(val)}</textarea>`}
+function m6(){const L=S.lab,i=L.i,c=LABS[i],hn=L.hint[i];
+ return `<p class="lead">Agora é com você: escreva uma consulta completa, com dicas progressivas.</p>
+ <div class="row sp"><b>Desafio prático</b>${eng()}</div>
+ <div class="task">${c.t}</div>${tview()}
+ ${editor('ed',L.txt[i],'SELECT …','setLab')}
+ <div class="row" style="margin:12px 0"><button class="btn" ${S.ready?'':'disabled'} onclick="runLab()">${ic('play')} Executar</button><button class="btn alt" ${hn>=3?'disabled':''} onclick="S.lab.txt[${i}]=E('ed').value;S.lab.hint[${i}]++;render()">${ic('bulb')} Dica (${hn}/3)</button>${S.teacher?`<button class="btn alt" onclick="S.lab.txt[${i}]=LABS[${i}].sol;render()">Inserir resolução</button>`:''}</div>
+ ${hn?`<div class="fb">${c.hints.slice(0,hn).map((x,k)=>`<b>Dica ${k+1}:</b> ${h(x)}`).join('<br>')}</div>`:''}${res(L.res[i])}${L.ok[i]?fb('Desafio concluído! Sua consulta atende ao enunciado.','ok'):''}`}
+function runCase(){const c=S.c;c.txt=E('cs').value;try{c.res=check(S.ad,c.txt,CASE);c.q=!!c.res.ok}catch(e){c.res={err:e.message};c.q=false}render()}
+function decide(){
+ const c=S.c,okc=c.city==='Campinas',oke=c.ev==='a';
+ const counts='Entre os 4 primeiros pedidos pendentes, Campinas aparece 2 vezes, Registro 1 vez e Santos 1 vez.';
+ const message=okc&&oke?'<b>Decisão fundamentada!</b> '+counts+' Portanto, Campinas receberá mais entregas. A cidade com o pedido de maior valor não é necessariamente a que receberá mais entregas.':
+ !c.city||!c.ev?'Escolha uma cidade e a evidência que sustenta a decisão.':
+ !okc?'Sua consulta filtrou corretamente os pedidos Pendentes. Mas a pergunta é qual cidade aparece mais vezes <b>entre os 4 primeiros pedidos</b>, e não qual possui o pedido de maior valor. '+counts:
+ 'A cidade está correta, mas a justificativa escolhida não demonstra essa conclusão. Compare as cidades dos quatro primeiros pedidos pendentes.';
+ c.msg=fb(message,okc&&oke?'ok':'bad');
+ if(okc&&oke)S.done.add(7);
+ render();
+}
+function m7(){const c=S.c,ct=['Registro','Campinas','Santos'],ev=[['a','Dos 4 pedidos pendentes de maior valor, 2 são de Campinas.'],['b','Registro possui o pedido pendente de maior valor; por isso, receberá mais entregas.'],['c','Santos é a cidade com mais pedidos no total.']];
+ return `<p class="lead">Caso inédito: consultar, interpretar e decidir.</p>
+ <div class="task"><b>O caso:</b><p style="margin:10px 0">A transportadora consegue fazer <b>4 entregas hoje</b>.</p><p style="margin:0">Regra da empresa: entregar somente pedidos <b>Pendentes</b>, começando pelos de <b>maior valor</b>. Considere apenas os <b>4 primeiros pedidos</b> após filtrar e ordenar. A gerente pergunta: <b>qual cidade receberá mais entregas hoje?</b></p></div>
+ <div class="row sp"><b>Etapa 1 · Reúna a evidência com uma consulta</b>${eng()}</div>
+ <div class="box" style="margin:10px 0"><h3>O que sua consulta deve fazer</h3><ul style="margin:0;padding-left:22px"><li><b>Mostrar</b> 3 colunas: <code>cidade</code>, <code>cliente</code> e <code>valor</code></li><li><b>Filtrar</b> só os pedidos com status <code>'Pendente'</code></li><li><b>Ordenar</b> do maior para o menor valor</li></ul></div>${tview()}
+ ${editor('cs',c.txt,'SELECT …','setCase')}
+ <div class="row" style="margin:12px 0"><button class="btn" ${S.ready?'':'disabled'} onclick="runCase()">${ic('play')} Executar</button><button class="btn alt" ${c.hint>=2?'disabled':''} onclick="S.c.txt=E('cs').value;S.c.hint++;render()">${ic('bulb')} Dica (${c.hint}/2)</button>${S.teacher?`<button class="btn alt" onclick="S.c.txt=CASE.sol;render()">Inserir resolução</button>`:''}</div>
+ ${c.hint?`<div class="fb">${['Estrutura: SELECT três colunas FROM pedidos WHERE status = ... ORDER BY ... DESC. Textos usam aspas simples.','Considere somente as quatro primeiras linhas da tabela de resultados, depois de filtrar e ordenar.'].slice(0,c.hint).map(h).join('<br>')}</div>`:''}${res(c.res)}
+ ${c.q?`<div class="task"><b>Etapa 2 · Decida com base no resultado</b></div><p class="mu">Observe apenas as <b>4 primeiras linhas</b> do resultado acima.</p><b>Cidade que receberá mais entregas:</b><div class="row" style="margin:8px 0">${ct.map(x=>`<button class="pill ${c.city===x?'sel':''}" onclick="S.c.city='${x}';render()">${x}</button>`).join('')}</div>
+ <b>Qual evidência sustenta a decisão?</b>${ev.map(([k,t])=>`<button class="opt ${c.ev===k?'sel':''}" onclick="S.c.ev='${k}';render()">${t}</button>`).join('')}
+ <button class="btn" onclick="decide()">Confirmar decisão</button>${c.msg}`:''}`}
+function end(){return `<div class="big"><h1>Caso encerrado!</h1><p class="lead">Você consultou, filtrou, ordenou e <b>analisou</b> dados de pedidos para sustentar uma decisão.</p></div>
+ <div class="box"><h3>Retomando o objetivo</h3>Analisar registros de um banco relacional com consultas SQL (SELECT, FROM, WHERE, AND, ORDER BY), identificar padrões e fundamentar decisões nos resultados.</div>
+ <div class="box" style="margin-top:12px"><h3>Continue estudando</h3>Pratique no <a href="https://sqlbolt.com/" target="_blank" rel="noopener noreferrer">SQLBolt</a>, consulte a <a href="https://www.sqlite.org/lang_select.html" target="_blank" rel="noopener noreferrer">documentação do SELECT no SQLite</a> e leia <em>Learning SQL</em> (Alan Beaulieu). Nas próximas aulas, vamos agrupar e combinar dados. Cada consulta que você escreve treina o olhar investigativo!</div>`}
+function home(){return `<h1>SQL Detetive: o mistério dos pedidos</h1>
+ <div class="box"><h3>Objetivo de aprendizagem · Bloom: Analisar</h3>Ao final da aula, você será capaz de analisar registros de um banco de dados relacional utilizando consultas SQL para selecionar, filtrar, ordenar e interpretar informações, identificando padrões e fundamentando decisões a partir dos resultados obtidos.</div>
+ <div class="g3" style="margin-top:12px">${TIT.slice(1,8).map((t,i)=>`<div class="box"><h3>${i+1} · ${t}</h3><span class="mu">${TM[i+1]}</span></div>`).join('')}</div>
+ <p class="mu">Total estimado: cerca de 25 minutos (o tempo do vídeo é definido pela professora). Trabalhe no seu navegador e participe pelo Meet. ${eng()}</p>`}
+const VIEW=[home,m1,m2,m3,m4,m5,m6,m7,end],TIT=['','Explore os dados','Vídeo · O que é SQL?','Consultar, filtrar e ordenar','Investigação científica','Jogo: detetive de consultas','Laboratório SQL','Análise e decisão',''],SK=['','Reconhecer','Assistir','Compreender','Interpretar','Diferenciar','Aplicar','Analisar e decidir',''],TM=['','2 min','≈ 3 min','5 min','3 min','3 min','3 min','4 min',''];
+const NOTES=['','Chave primária: id. Planejamento: id = Não usar; cliente e valor = Mostrar; cidade e status = Filtrar. O vídeo vem antes da explicação de SQL.','Vídeo introdutório: de 0:31 a 2:11. O aluno apenas confirma que assistiu.','Apresente SELECT, FROM, WHERE, AND e ORDER BY. Respostas: nada acontece com os dados; WHERE cidade = \'Santos\' AND status = \'Pendente\'.','Os alunos leem dois trechos literais da seção 2.2, com tradução nossa. Confirmam leitura sem responder perguntas.','Respostas: rodada 1 = A (filtrar Santos e Pendente e mostrar cliente/valor); rodada 2 = C (faltou WHERE). Explique a diferença entre consulta válida e resposta correta.','Desafio A: '+LABS[0].sol,'Consulta: '+CASE.sol+' Decisão: Campinas (2 dos 4 pedidos). Sem o filtro de status, o topo 4 incluiria o cancelado de João (990) e o entregue de Bruno (800), sugerindo Registro.',''];
+const can=n=>n>=0&&n<=8;
+function go(n){if(n<0||n>8||!can(n))return;S.cur=n;render();scrollTo(0,0)}
+function render(){const c=S.cur;E('steps').innerHTML=STEPS.map((s,i)=>`<button class="st ${c===i?'on':''} ${S.done.has(i)?'dn':''}" ${can(i)?'':'disabled'} onclick="go(${i})">${S.done.has(i)?'✓ ':''}${s}</button>`).join('');
+ const lock=false;
+ E('main').innerHTML=`${S.teacher&&c?`<details class="tch"><summary>${ic('lock')} Resolução da professora</summary><p>${h(NOTES[c])}</p></details>`:''}<div class="card">${c>0&&c<8?`<div class="row sp"><h2>Missão ${c} · ${TIT[c]}</h2><span class="row"><span class="chip">${SK[c]}</span><span class="chip">${ic('clock')} ${TM[c]}</span></span></div>`:''}${VIEW[c]()}</div>
+ <div class="nav"><button class="btn alt" ${c?'':'disabled'} onclick="go(${c-1})">← Voltar</button>${c<8?`<span class="row"><button class="btn" ${lock?'disabled':''} onclick="go(${c+1})">${c===7?'Encerrar aula':'Continuar'} →</button></span>`:''}</div>`;
+ E('tb').innerHTML=ic('lock')+(S.teacher?' Professora ativa':' Professora')}
+function setLab(v){S.lab.txt[S.lab.i]=v}function setCase(v){S.c.txt=v}
+function tick(){const t=Math.floor((S.el+(S.run?Date.now()-S.t1:0))/1000);E('clock').innerHTML=ic('clock')+' '+String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')+(S.run?'':' · parado')}
+function paintPP(){E('pp').innerHTML=ic(S.run?'pause':'play');const l=S.run?'Pausar cronômetro':'Iniciar cronômetro';E('pp').title=l;E('pp').setAttribute('aria-label',l)}
+function toggleClock(){if(S.run){S.el+=Date.now()-S.t1;S.run=false}else{S.t1=Date.now();S.run=true}paintPP();tick()}
+function restartClock(){if(confirm('Zerar o cronômetro da aula? Ele ficará parado até você iniciar.')){S.el=0;S.run=false;paintPP();tick()}}
+function openTeacher(){if(S.teacher)return;E('modal').innerHTML=`<div class="modal"><div class="card"><h3>Acesso da professora</h3><label for="pw">Senha</label><input id="pw" class="pw" type="password" autocomplete="off" onkeydown="if(event.key=='Enter')unlock()"><div id="pm" class="mu"></div><div class="row"><button class="btn" onclick="unlock()">Entrar</button><button class="btn alt" onclick="E('modal').innerHTML=''">Cancelar</button></div></div></div>`;E('pw').focus()}
+function unlock(){if(E('pw').value===PW){S.teacher=true;try{sessionStorage.setItem('sqld2','1')}catch(e){}E('modal').innerHTML='';render()}else E('pm').textContent='Senha incorreta.'}
+function mkAdapter(Q){return q=>{const d=new Q.Database();try{d.run(SCHEMA);const s=d.prepare('INSERT INTO pedidos VALUES(?,?,?,?,?)');DATA.forEach(r=>s.run(r));s.free();d.run('PRAGMA query_only=1');const o=d.exec(q);return o.length?{cols:o[0].columns,rows:o[0].values}:{cols:[],rows:[]}}finally{d.close()}}}
+async function boot(){try{if(typeof initSqlJs!=='function')throw 0;S.ad=mkAdapter(await initSqlJs({locateFile:f=>CDN+f}));S.ready=true}catch(e){S.err='SQLite indisponível: é preciso internet para carregar o mecanismo. Recarregue a página.'}const a=document.activeElement;if(!a||(a.tagName!=='TEXTAREA'&&a.tagName!=='INPUT'))render()}
+E('lg').innerHTML=ic('search');E('rc').innerHTML=ic('reset');try{S.teacher=sessionStorage.getItem('sqld2')==='1'}catch(e){}
+document.addEventListener('keydown',e=>{if(e.altKey&&e.shiftKey&&e.key.toLowerCase()==='p')openTeacher()});
+paintPP();tick();setInterval(tick,1000);render();boot();
+</script></body></html>
